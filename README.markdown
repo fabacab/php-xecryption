@@ -78,6 +78,14 @@ Password candidate: aabm
 Continue guessing? [y]: n
 ```
 
+And a brute force attack:
+
+```sh
+$ php xecrypt.php --mode brute --file my_encrypted_file --start 0 --max 1000
+```
+
+When using `--mode brute`, the `--start` and `--max` flags are optional and default to the values shown.
+
 # See also
 
 * [XECryption on GitHub](https://github.com/search?q=xecryption)

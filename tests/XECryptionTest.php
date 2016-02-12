@@ -43,4 +43,11 @@ END_MSG;
         $this->markTestIncomplete();
     }
 
+    /**
+     * Tests brute force attack method.
+     */
+    public function testBruteForceAttack () {
+        $this->markTestIncomplete();
+    }
+
 }

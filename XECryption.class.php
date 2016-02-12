@@ -69,12 +69,12 @@ class XECryption {
      * @link http://www.asciitable.com/ ASCII code table reference.
      *
      * @param string $ciphertext
-     * @param string $password
+     * @param string|int $key
      *
      * @return string|false
      */
-    public static function decrypt ($ciphertext, $password) {
-        $key = self::getKey($password);
+    public static function decrypt ($ciphertext, $key) {
+        $key = (is_int($key)) ? $key : self::getKey($key);
         $plaintext = '';
 
         // XECryption uses dots followed by a number to encode the
@@ -135,10 +135,7 @@ class XECryption {
 
             $possible_plain = self::decrypt($ciphertext, $guess);
             if (self::testPlain($possible_plain)) {
-                print self::colorize('Possible plaintext:', '[31m').PHP_EOL.$possible_plain.PHP_EOL;
-                print self::colorize("Password candidate: $guess".PHP_EOL, '[31m');
-                $r = readline('Continue guessing? [y]: ');
-                if ('N' === strtoupper(substr($r, 0, 1))) {
+                if (false === self::promptToContinue($possible_plain, $guess)) {
                     fclose($fh);
                     return $guess;
                 }
@@ -149,6 +146,42 @@ class XECryption {
         fclose($fh);
 
         return false;
+    }
+
+    /**
+     * Attempts numeric brute-force crack against XECryption-enciphered text.
+     *
+     * @param string $ciphertext
+     * @param int $start
+     * @param int $max
+     *
+     * @return int|false
+     */
+    public static function bruteForce ($ciphertext, $start = 0, $max = 1000) {
+        for ($i = $start; $i < $max; $i++) {
+            $possible_plain = self::decrypt($ciphertext, $i);
+            if (self::testPlain($possible_plain)) {
+                if (false === self::promptToContinue($possible_plain, $i)) {
+                    return $i;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * CLI prompt asking user if the plaintext is recovered.
+     *
+     * @param string possible_plain
+     * @param string|int $guess
+     *
+     * @return bool
+     */
+    private static function promptToContinue ($possible_plain, $guess) {
+        print self::colorize('Possible plaintext:', '[31m').PHP_EOL.$possible_plain.PHP_EOL;
+        print self::colorize("Password candidate: $guess".PHP_EOL, '[31m');
+        $r = readline('Continue guessing? [y]: ');
+        return ('N' === strtoupper(substr($r, 0, 1))) ? false : true;
     }
 
     /**
